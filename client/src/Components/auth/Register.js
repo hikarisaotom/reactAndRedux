@@ -1,9 +1,10 @@
 import React, { Fragment, useState } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom'; //si se importa tambien se debe exporar abajo
-import { setAlert } from '../../actions/alert.js';
-
-export const Register = (props) => {
+import { Link, Redirect } from 'react-router-dom'; //si se importa tambien se debe exporar abajo
+import { setAlert } from '../../actions/alert';
+import { register } from '../../actions/auth';
+import PropTypes from 'prop-types';
+const Register = ({ setAlert, register, isAuthenticated }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,11 +23,16 @@ export const Register = (props) => {
     e.preventDefault();
     if (password !== password2) {
       setAlert('Passwords do not match', 'danger');
-      console.log(props);
+      //console.log(props);
     } else {
-      console.log('wi');
+      register({ name, email, password });
     }
   };
+
+  //Redirect
+  if (isAuthenticated) {
+    return <Redirect to='/dashboard' />;
+  }
   return (
     <Fragment>
       <h1 className='large text-primary'>Sign Up</h1>
@@ -41,7 +47,6 @@ export const Register = (props) => {
             name='name'
             value={name}
             onChange={(e) => onChange(e)}
-            required
           />
         </div>
         <div className='form-group'>
@@ -62,7 +67,6 @@ export const Register = (props) => {
             type='password'
             placeholder='Password'
             name='password'
-            minLength='6'
             value={password}
             onChange={(e) => onChange(e)}
           />
@@ -86,4 +90,13 @@ export const Register = (props) => {
   );
 };
 
-export default connect(null, { setAlert })(Register);
+Register.propTypes = {
+  setAlert: PropTypes.func.isRequired,
+  register: PropTypes.func.isRequired,
+  isAuthenticated: PropTypes.bool,
+};
+
+const mapStateToProps = (state) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+});
+export default connect(mapStateToProps, { setAlert, register })(Register);

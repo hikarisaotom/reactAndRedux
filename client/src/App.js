@@ -1,28 +1,49 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Landing } from './Components/layout/Landing';
-import { Navbar } from './Components/layout/Navbar';
-import { Register } from './Components/auth/Register';
-import { Login } from './Components/auth/Login';
+import Landing from './Components/layout/Landing';
+import Navbar from './Components/layout/Navbar';
+import Register from './Components/auth/Register';
+import Login from './Components/auth/Login';
+import Alert from './Components/layout/Alert';
+import Dashboard from './Components/dashboard/Dashboard';
+import PrivateRoute from './Components/routing/PrivateRoute';
 //Redux
 import { Provider } from 'react-redux';
 import store from './store';
-const App = () => (
-  <Provider store={store}>
-    <Router>
-      <Fragment>
-        <Navbar></Navbar>
-        <Route exact path='/' component={Landing}></Route>
-        <section className='container'>
-          <Switch>
-            <Route exact path='/register' component={Register}></Route>
-            <Route exact path='/login' component={Login}></Route>
-          </Switch>
-        </section>
-      </Fragment>
-    </Router>
-  </Provider>
-);
+import { loadUser } from './actions/auth';
+import setAuthToken from './utils/setAuthToken';
+
+if (localStorage.token) {
+  setAuthToken(localStorage.token);
+}
+
+const App = () => {
+  useEffect(() => {
+    store.dispatch(loadUser());
+  }, []);
+  return (
+    <Provider store={store}>
+      <Router>
+        <Fragment>
+          <Navbar></Navbar>
+          <Route exact path='/' component={Landing}></Route>
+          <section className='container'>
+            <Alert></Alert>
+            <Switch>
+              <Route exact path='/register' component={Register}></Route>
+              <Route exact path='/login' component={Login}></Route>
+              <PrivateRoute
+                exact
+                path='/dashboard'
+                component={Dashboard}
+              ></PrivateRoute>
+            </Switch>
+          </section>
+        </Fragment>
+      </Router>
+    </Provider>
+  );
+};
 
 export default App;
