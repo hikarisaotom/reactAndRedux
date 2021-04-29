@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GET_PROFILE, PROFILE_ERROR } from './types';
+import { GET_PROFILE, PROFILE_ERROR, UPDATE_PROFILE } from './types';
 import { setAlert } from './alert';
 // Get current users profile
 export const getCurrentProfile = () => async (dispatch) => {
@@ -21,7 +21,6 @@ export const getCurrentProfile = () => async (dispatch) => {
 };
 
 //Create or update a Profile
-
 export const createProfile = (FormData, history, edit = false) => async (
   dispatch
 ) => {
@@ -49,6 +48,73 @@ export const createProfile = (FormData, history, edit = false) => async (
     console.log(err.response);
     const errors = err.response.data.errors;
 
+    if (errors) {
+      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
+    }
+
+    dispatch({
+      type: PROFILE_ERROR,
+      payload: { msg: err.response.statusText, status: err.response.status },
+    });
+  }
+};
+
+//Add Experience
+export const addExperience = (FormData, history) => async (dispatch) => {
+  try {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const res = await axios.put('/api/profile/experience', FormData, config);
+
+    dispatch({
+      type: UPDATE_PROFILE,
+      payload: res.data,
+    });
+
+    dispatch(setAlert('Experience added', 'success'));
+
+    //Aqui no se puede usar el redirect, por eso usamos el history que tiene el push que es basicamente lo mismp
+    history.push('/dashboard');
+  } catch (err) {
+    console.log(err.response);
+    const errors = err.response.data.errors;
+    if (errors) {
+      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
+    }
+
+    dispatch({
+      type: PROFILE_ERROR,
+      payload: { msg: err.response.statusText, status: err.response.status },
+    });
+  }
+};
+
+//Add Education
+export const addEducation = (FormData, history) => async (dispatch) => {
+  try {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const res = await axios.put('/api/profile/education', FormData, config);
+
+    dispatch({
+      type: UPDATE_PROFILE,
+      payload: res.data,
+    });
+
+    dispatch(setAlert('Education added', 'success'));
+    //Aqui no se puede usar el redirect, por eso usamos el history que tiene el push que es basicamente lo mismp
+    history.push('/dashboard');
+  } catch (err) {
+    console.log(err.response);
+    const errors = err.response.data.errors;
     if (errors) {
       errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
     }
